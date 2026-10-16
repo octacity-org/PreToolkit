@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "octacity-org": {
+      "source": {
+        "source": "github",
+        "repo": "octacity-org/octapowers"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "octapowers@octacity-org": true
+  }
+}
