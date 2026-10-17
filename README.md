@@ -4,7 +4,10 @@ Composable, reproducible, and maintainable data preprocessing for machine learni
 
 Preprocessing Toolkit provides data preparation steps — imputation, encoding, scaling, and more — as self-contained building blocks that you chain into a pipeline. Instead of rewriting the same cleaning code in every project, you compose blocks that keep track of how they transform your data and guarantee the same input is always transformed the same way.
 
-> Part of the [Octacity](https://github.com/0ctacity) community · built by the **.LUCID** team.
+> Part of the [Octacity](https://github.com/octacity-org) community · built by the **.LUCID** team.
+
+> **Status: v0.1 in development.** The shared `BasePreprocessor` contract is in place;
+> the blocks and `Pipeline` described below are being built. The API may still change.
 
 ---
 
@@ -24,23 +27,29 @@ This is **not** a replacement for scikit-learn — it builds on top of it.
 
 ## Installation
 
-```bash
-pip install preprocessing-toolkit
-```
-
-Or, for development:
+The package is not on PyPI yet. Install it from source:
 
 ```bash
-git clone https://github.com/0ctacity/preprocessing-toolkit.git
-cd preprocessing-toolkit
+git clone https://github.com/octacity-org/PreToolkit.git
+cd PreToolkit
 pip install -e .
 ```
 
-Requires Python 3.10+. Core dependencies: `numpy`, `pandas`.
+For development (adds `pytest`, `ruff` and `scikit-learn`):
+
+```bash
+pip install -e ".[dev]"
+```
+
+Requires Python 3.10+. Runtime dependencies: `numpy`, `pandas`. scikit-learn is not
+required at runtime, but the blocks work inside scikit-learn pipelines, `clone`,
+`cross_val_score` and `GridSearchCV`.
 
 ---
 
 ## Quick start
+
+The planned v0.1 API (the blocks below are not implemented yet):
 
 ```python
 from preprocessing_toolkit import (
@@ -50,15 +59,17 @@ from preprocessing_toolkit import (
     FeatureScaler,
 )
 
-pipe = Pipeline([
-    MissingValueImputer(strategy="median"),
-    CategoricalEncoder(method="onehot"),
-    FeatureScaler(method="standard"),
-])
+pipe = Pipeline(
+    [
+        MissingValueImputer(strategy="median"),
+        CategoricalEncoder(method="onehot"),
+        FeatureScaler(method="standard"),
+    ]
+)
 
 # fit on training data only, then transform both — no leakage
 X_train_clean = pipe.fit_transform(X_train)
-X_test_clean  = pipe.transform(X_test)
+X_test_clean = pipe.transform(X_test)
 ```
 
 The key detail: `fit` runs on the training data only. When you call `transform` on the test set, the statistics learned from training are applied — the test set never leaks into the fitting process.
@@ -76,8 +87,8 @@ BasePreprocessor (abstract)
 
 Concrete blocks:
   |-- MissingValueImputer   (mean / median / most_frequent)
-  |-- CategoricalEncoder    (one-hot / label / ordinal)
-  \-- FeatureScaler         (standard / minmax / robust)
+  |-- CategoricalEncoder    (one-hot / ordinal)
+  \-- FeatureScaler         (standard / minmax)
 
 Pipeline (also a BasePreprocessor):
   \-- chains blocks, applied in sequence
@@ -92,8 +103,8 @@ Because every block shares `fit` / `transform`, the pipeline treats them uniform
 | Block | What it does | Options |
 |-------|--------------|---------|
 | `MissingValueImputer` | Fills missing values | `mean`, `median`, `most_frequent` |
-| `CategoricalEncoder` | Converts categories to numbers | `onehot`, `label`, `ordinal` |
-| `FeatureScaler` | Normalizes value ranges | `standard`, `minmax`, `robust` |
+| `CategoricalEncoder` | Converts categories to numbers | `onehot`, `ordinal`; `handle_unknown="error"` or `"ignore"` |
+| `FeatureScaler` | Normalizes value ranges | `standard`, `minmax` |
 | `Pipeline` | Chains blocks in sequence | — |
 
 ---
