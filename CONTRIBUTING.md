@@ -29,7 +29,8 @@ ruff check .
 pytest
 ```
 
-CI runs the same commands on Python 3.10 and 3.13 with the latest dependency versions.
+CI runs the same commands on Python 3.10 and 3.13 with the latest dependency versions,
+and on Python 3.10 with the oldest supported scikit-learn (1.3).
 
 ## Adding a block
 

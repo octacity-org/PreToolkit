@@ -1,0 +1,11 @@
+# Local Claude Code settings
+.claude/settings.json
+
+# Python
+__pycache__/
+*.egg-info/
+.venv/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
