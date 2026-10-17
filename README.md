@@ -1,5 +1,7 @@
 # Preprocessing Toolkit
 
+![CI](https://github.com/octacity-org/PreToolkit/actions/workflows/ci.yml/badge.svg)
+
 Composable, reproducible, and maintainable data preprocessing for machine learning.
 
 Preprocessing Toolkit provides data preparation steps — imputation, encoding, scaling, and more — as self-contained building blocks that you chain into a pipeline. Instead of rewriting the same cleaning code in every project, you compose blocks that keep track of how they transform your data and guarantee the same input is always transformed the same way.
@@ -21,7 +23,9 @@ scikit-learn gives you the primitives, but leaves reproducibility, data-type awa
 - **Data-type awareness** — blocks know which columns are numeric vs. categoric and route transformations automatically; no manual column slicing.
 - **Metadata tracking** — the toolkit tracks how input feature names map to output feature names across the whole chain, even after one-hot encoding or binning.
 
-This is **not** a replacement for scikit-learn — it builds on top of it.
+This is **not** a replacement for scikit-learn — it is designed to work alongside it:
+blocks run inside scikit-learn pipelines, `cross_val_score` and `GridSearchCV`,
+without depending on it.
 
 ---
 
