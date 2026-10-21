@@ -67,7 +67,7 @@ class CategoricalEncoder(BasePreprocessor):
             _check_no_missing(values)
             categories = self.categories_[column]
             # Codes are the position in ``categories``; unseen values get -1.
-            codes = pd.Categorical(values, categories=categories).codes.astype(np.int64)
+            codes = pd.Index(categories).get_indexer(values).astype(np.int64)
             if self.handle_unknown == "error" and (codes == -1).any():
                 unknown = sorted(values[codes == -1].drop_duplicates())
                 raise ValueError(
