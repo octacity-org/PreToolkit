@@ -1,6 +1,6 @@
 """Fill missing values using statistics learned during fitting."""
 
-from pandas.api.types import is_numeric_dtype
+from pandas.api.types import is_bool_dtype, is_numeric_dtype
 
 from preprocessing_toolkit.base import BasePreprocessor
 
@@ -24,14 +24,20 @@ class MissingValueImputer(BasePreprocessor):
             if values.empty:
                 raise ValueError(f"Column {column!r} contains only missing values.")
 
-            if is_numeric_dtype(X[column]) and self.strategy == "mean":
+            # Booleans are categories: a mean of 0.5 is not a valid fill value.
+            numeric = is_numeric_dtype(X[column]) and not is_bool_dtype(X[column])
+            if numeric and self.strategy == "mean":
                 statistic = values.mean()
-            elif is_numeric_dtype(X[column]) and self.strategy == "median":
+            elif numeric and self.strategy == "median":
                 statistic = values.median()
             else:
                 counts = values.value_counts()
                 candidates = counts[counts == counts.max()].index
-                statistic = min(candidates)
+                try:
+                    statistic = min(candidates)
+                except TypeError:
+                    # Mixed types such as "a" and 1 cannot be ordered directly.
+                    statistic = min(candidates, key=str)
             statistics[column] = statistic
 
         self.statistics_ = statistics
