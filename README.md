@@ -1,14 +1,16 @@
 # Preprocessing Toolkit
 
+![CI](https://github.com/octacity-org/PreToolkit/actions/workflows/ci.yml/badge.svg)
+
 Composable, reproducible, and maintainable data preprocessing for machine learning.
 
 Preprocessing Toolkit provides data preparation steps — imputation, encoding, scaling, and more — as self-contained building blocks that you chain into a pipeline. Instead of rewriting the same cleaning code in every project, you compose blocks that keep track of how they transform your data and guarantee the same input is always transformed the same way.
 
 > Part of the [Octacity](https://github.com/octacity-org) community · built by the **.LUCID** team.
 
-> **Status: v0.1 in development.** The shared `BasePreprocessor` contract and
-> `MissingValueImputer` are in place; the other blocks and `Pipeline` described
-> below are being built. The API may still change.
+> **Status: v0.1 in development.** The shared `BasePreprocessor` contract,
+> `MissingValueImputer` and `FeatureScaler` are in place; the other blocks and
+> `Pipeline` described below are being built. The API may still change.
 
 ---
 
@@ -22,7 +24,9 @@ scikit-learn gives you the primitives, but leaves reproducibility, data-type awa
 - **Data-type awareness** — blocks know which columns are numeric vs. categoric and route transformations automatically; no manual column slicing.
 - **Metadata tracking** — the toolkit tracks how input feature names map to output feature names across the whole chain, even after one-hot encoding or binning.
 
-This is **not** a replacement for scikit-learn — it builds on top of it.
+This is **not** a replacement for scikit-learn — it is designed to work alongside it:
+blocks run inside scikit-learn pipelines, `cross_val_score` and `GridSearchCV`,
+without depending on it.
 
 ---
 
@@ -50,8 +54,8 @@ required at runtime, but the blocks work inside scikit-learn pipelines, `clone`,
 
 ## Quick start
 
-The planned v0.1 API (`MissingValueImputer` is available; the other blocks and
-`Pipeline` are still being built):
+The planned v0.1 API (`MissingValueImputer` and `FeatureScaler` are available; the
+other blocks and `Pipeline` are still being built):
 
 ```python
 from preprocessing_toolkit import (
