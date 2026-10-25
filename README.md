@@ -8,8 +8,9 @@ Preprocessing Toolkit provides data preparation steps — imputation, encoding, 
 
 > Part of the [Octacity](https://github.com/octacity-org) community · built by the **.LUCID** team.
 
-> **Status: v0.1 in development.** The shared `BasePreprocessor` contract is in place;
-> the blocks and `Pipeline` described below are being built. The API may still change.
+> **Status: v0.1 in development.** The shared `BasePreprocessor` contract,
+> `MissingValueImputer` and `FeatureScaler` are in place; the other blocks and
+> `Pipeline` described below are being built. The API may still change.
 
 ---
 
@@ -53,7 +54,8 @@ required at runtime, but the blocks work inside scikit-learn pipelines, `clone`,
 
 ## Quick start
 
-The planned v0.1 API (the blocks below are not implemented yet):
+The planned v0.1 API (`MissingValueImputer` and `FeatureScaler` are available; the
+other blocks and `Pipeline` are still being built):
 
 ```python
 from preprocessing_toolkit import (
@@ -103,6 +105,19 @@ Because every block shares `fit` / `transform`, the pipeline treats them uniform
 ---
 
 ## Blocks
+
+`MissingValueImputer` learns fill values from training data and reuses them for
+new data. Numeric columns use `mean` (the default), `median` or `most_frequent`;
+non-numeric columns always use their most frequent value.
+
+```python
+from preprocessing_toolkit import MissingValueImputer
+
+imputer = MissingValueImputer(strategy="median")
+X_train_filled = imputer.fit_transform(X_train)
+X_test_filled = imputer.transform(X_test)
+print(imputer.statistics_)
+```
 
 | Block | What it does | Options |
 |-------|--------------|---------|
