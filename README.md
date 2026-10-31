@@ -8,9 +8,9 @@ Preprocessing Toolkit provides data preparation steps — imputation, encoding, 
 
 > Part of the [Octacity](https://github.com/octacity-org) community · built by the **.LUCID** team.
 
-> **Status: v0.1 in development.** The shared `BasePreprocessor` contract,
-> `MissingValueImputer` and `FeatureScaler` are in place; the other blocks and
-> `Pipeline` described below are being built. The API may still change.
+> **Status: v0.1 in development.** The core building blocks (`MissingValueImputer`,
+> `CategoricalEncoder`, `FeatureScaler`) and `Pipeline` are in place. See
+> [examples/quickstart.ipynb](examples/quickstart.ipynb) for a walkthrough notebook.
 
 ---
 
@@ -40,7 +40,7 @@ cd PreToolkit
 pip install -e .
 ```
 
-For development (adds `pytest`, `ruff` and `scikit-learn`):
+For development (adds `pytest`, `ruff`, `scikit-learn` and notebook tooling):
 
 ```bash
 pip install -e ".[dev]"
@@ -54,15 +54,34 @@ required at runtime, but the blocks work inside scikit-learn pipelines, `clone`,
 
 ## Quick start
 
-The planned v0.1 API (`MissingValueImputer` and `FeatureScaler` are available; the
-other blocks and `Pipeline` are still being built):
+The example below creates a small inline dataset with numeric, categorical,
+and missing values, and processes it through a complete pipeline:
 
 ```python
+import numpy as np
+import pandas as pd
 from preprocessing_toolkit import (
-    Pipeline,
-    MissingValueImputer,
     CategoricalEncoder,
     FeatureScaler,
+    MissingValueImputer,
+    Pipeline,
+)
+
+# Training and test data with numeric, categorical, and missing values
+X_train = pd.DataFrame(
+    {
+        "age": [25.0, np.nan, 35.0, 40.0],
+        "city": ["Paris", "London", "Paris", np.nan],
+        "salary": [50000.0, 60000.0, np.nan, 80000.0],
+    }
+)
+
+X_test = pd.DataFrame(
+    {
+        "age": [30.0, 45.0],
+        "city": ["London", "Paris"],
+        "salary": [55000.0, 75000.0],
+    }
 )
 
 pipe = Pipeline(
@@ -73,12 +92,24 @@ pipe = Pipeline(
     ]
 )
 
-# fit on training data only, then transform both — no leakage
+# Fit on training data only, then transform both — no data leakage
 X_train_clean = pipe.fit_transform(X_train)
 X_test_clean = pipe.transform(X_test)
+
+print(pipe.get_feature_names_out())
+# ['age', 'city_London', 'city_Paris', 'salary']
+
+print(X_train_clean.round(2))
+#     age  city_London  city_Paris  salary
+# 0 -1.61        -0.58        0.58   -1.15
+# 1  0.23         1.73       -1.73   -0.23
+# 2  0.23        -0.58        0.58   -0.23
+# 3  1.15        -0.58        0.58    1.61
 ```
 
 The key detail: `fit` runs on the training data only. When you call `transform` on the test set, the statistics learned from training are applied — the test set never leaks into the fitting process.
+
+For an end-to-end interactive tutorial including scikit-learn cross-validation and a data leakage demonstration, see [`examples/quickstart.ipynb`](examples/quickstart.ipynb).
 
 ---
 
