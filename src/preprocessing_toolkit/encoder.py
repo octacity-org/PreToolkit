@@ -11,8 +11,10 @@ class CategoricalEncoder(BasePreprocessor):
     """Encode non-numeric columns with one-hot or ordinal encoding.
 
     Only object, string and category columns are encoded; other columns pass
-    through unchanged. Categories are learned only from ``fit`` data, sorted,
-    and stored in ``categories_`` as ``{column: [category, ...]}``.
+    through unchanged. Categories are learned only from ``fit`` data and
+    stored in ``categories_`` as ``{column: [category, ...]}``. Object and
+    string columns use their sorted values; category columns keep their
+    declared categories and order, including levels unused in ``fit`` data.
 
     Parameters
     ----------
@@ -45,7 +47,10 @@ class CategoricalEncoder(BasePreprocessor):
         for column in X.columns:
             if _is_categorical(X[column]):
                 _check_no_missing(X[column])
-                categories[column] = sorted(X[column].drop_duplicates())
+                if isinstance(X[column].dtype, pd.CategoricalDtype):
+                    categories[column] = list(X[column].cat.categories)
+                else:
+                    categories[column] = _sorted_unique(X[column])
 
         names = _output_columns(X.columns, categories, self.method)
         duplicated = sorted({name for name in names if names.count(name) > 1})
@@ -69,7 +74,7 @@ class CategoricalEncoder(BasePreprocessor):
             # Codes are the position in ``categories``; unseen values get -1.
             codes = pd.Index(categories).get_indexer(values).astype(np.int64)
             if self.handle_unknown == "error" and (codes == -1).any():
-                unknown = sorted(values[codes == -1].drop_duplicates())
+                unknown = _sorted_unique(values[codes == -1])
                 raise ValueError(
                     f"Column {column!r} contains categories not seen in fit: {unknown}."
                 )
@@ -98,6 +103,16 @@ def _is_categorical(values):
         or is_string_dtype(values)
         or isinstance(values.dtype, pd.CategoricalDtype)
     )
+
+
+def _sorted_unique(values):
+    unique = list(values.drop_duplicates())
+    try:
+        return sorted(unique)
+    except TypeError:
+        # Mixed types such as "a" and 1 cannot be ordered directly; the type
+        # name breaks ties like 1 and "1" so the order never depends on rows.
+        return sorted(unique, key=lambda value: (str(value), type(value).__name__))
 
 
 def _check_no_missing(values):

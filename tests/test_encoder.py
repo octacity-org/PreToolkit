@@ -89,6 +89,35 @@ def test_object_string_and_category_columns_are_encoded(dtype):
     assert encoder.transform(X)["c_b"].tolist() == [1, 0, 1]
 
 
+def test_ordered_category_keeps_declared_order_and_unused_levels():
+    X = pd.DataFrame(
+        {
+            "level": pd.Categorical(
+                ["low", "high", "low"],
+                categories=["low", "medium", "high"],
+                ordered=True,
+            )
+        }
+    )
+    encoder = CategoricalEncoder(method="ordinal").fit(X)
+    assert encoder.categories_ == {"level": ["low", "medium", "high"]}
+    assert encoder.transform(X)["level"].tolist() == [0, 2, 0]
+
+
+def test_mixed_type_column_is_encoded_independent_of_row_order():
+    X = pd.DataFrame({"c": ["b", 1, "a", "1"]})
+    for values in (X, X.iloc[::-1]):
+        encoder = CategoricalEncoder(method="ordinal").fit(values)
+        assert encoder.categories_ == {"c": [1, "1", "a", "b"]}
+    assert encoder.transform(X)["c"].tolist() == [3, 0, 2, 1]
+
+
+def test_mixed_type_unknown_values_are_reported():
+    encoder = CategoricalEncoder().fit(pd.DataFrame({"c": ["a", "b"]}))
+    with pytest.raises(ValueError, match=r"\[2, 'z'\]"):
+        encoder.transform(pd.DataFrame({"c": ["z", 2, "a"]}))
+
+
 def test_categories_do_not_depend_on_row_order(train):
     reversed_train = train.iloc[::-1]
     assert (
