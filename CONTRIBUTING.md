@@ -32,9 +32,19 @@ pytest
 CI runs the same commands on Python 3.10 and 3.13 with the latest dependency versions,
 and on Python 3.10 with the oldest supported scikit-learn (1.3).
 
+## Claiming an issue
+
+1. Comment on the issue that you'd like to work on it.
+2. Wait until a maintainer assigns the issue to you before you start, so two people
+   don't work on the same thing. Maintainers only assign people who asked on the issue.
+3. Open a pull request early (a draft is fine) and link it with `Closes #<number>`.
+4. If an assigned issue has no activity for 7 days, a maintainer may unassign it so
+   someone else can pick it up.
+
 ## Adding a block
 
-1. Open an issue describing the block and its parameters.
+1. Claim an existing issue for the block (see above), or open one describing the block
+   and its parameters.
 2. Subclass `BasePreprocessor` in its own module (`src/preprocessing_toolkit/<block>.py`)
    and implement `_fit(self, X, y=None)` and `_transform(self, X)`.
 3. Follow the block rules:
