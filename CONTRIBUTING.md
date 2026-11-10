@@ -57,4 +57,6 @@ and on Python 3.10 with the oldest supported scikit-learn (1.3).
    - If the block creates or renames columns, override `get_feature_names_out`.
 4. Add tests in `tests/test_<block>.py`, including leakage (statistics come from the
    training data only) and a run inside `sklearn` `cross_val_score`.
-5. Open a pull request; the maintainers review it for interface consistency.
+5. Add the block to `BLOCKS` in `tests/test_leakage.py`, so the shared leakage checks
+   run on it too. A test fails if an exported block is missing from that list.
+6. Open a pull request; the maintainers review it for interface consistency.
