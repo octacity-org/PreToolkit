@@ -24,15 +24,29 @@ jobs:
             deps: oldest
             extra: '"scikit-learn==1.3.*" "numpy<2"'
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install
-        run: pip install -e ".[dev]" ${{ matrix.extra }}
+        run: uv sync --locked
+      - name: Install oldest supported versions
+        if: matrix.extra
+        run: uv pip install ${{ matrix.extra }}
       - name: Lint
         run: |
-          ruff check .
-          ruff format --check .
+          uv run --no-sync ruff check .
+          uv run --no-sync ruff format --check .
       - name: Test
-        run: pytest
+        run: uv run --no-sync pytest
+
+  omniship:
+    name: OmniShip files are up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+      # workflow.py is the source of truth for omniship.yaml, omniship.lock and
+      # the check / build / ship workflows; this fails if they were not regenerated.
+      - name: Check generated files
+        run: uvx --from omniship==0.6.0 omniship generate --check

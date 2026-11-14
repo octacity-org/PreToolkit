@@ -1,6 +1,6 @@
 """Chain preprocessing blocks so that one ``fit`` / ``transform`` runs them all."""
 
-from preprocessing_toolkit.base import BasePreprocessor, _check_dataframe
+from pretoolkit.base import BasePreprocessor, _check_dataframe
 
 
 class Pipeline(BasePreprocessor):

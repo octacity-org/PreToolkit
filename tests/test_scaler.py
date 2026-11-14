@@ -6,7 +6,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV, cross_val_score
 from sklearn.pipeline import make_pipeline
 
-from preprocessing_toolkit import BasePreprocessor, FeatureScaler, NotFittedError
+from pretoolkit import BasePreprocessor, FeatureScaler, NotFittedError
 
 
 @pytest.fixture

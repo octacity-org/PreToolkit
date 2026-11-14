@@ -2,7 +2,7 @@
 
 from pandas.api.types import is_bool_dtype, is_numeric_dtype
 
-from preprocessing_toolkit.base import BasePreprocessor
+from pretoolkit.base import BasePreprocessor
 
 
 class MissingValueImputer(BasePreprocessor):

@@ -16,8 +16,8 @@ from sklearn.dummy import DummyClassifier
 from sklearn.model_selection import KFold, cross_validate
 from sklearn.pipeline import make_pipeline
 
-import preprocessing_toolkit
-from preprocessing_toolkit import (
+import pretoolkit
+from pretoolkit import (
     BasePreprocessor,
     CategoricalEncoder,
     FeatureScaler,
@@ -282,8 +282,8 @@ def test_cross_validation_fits_each_block_on_its_training_fold_only(block, xy):
 def test_every_exported_block_is_in_the_leakage_suite():
     exported = {
         obj
-        for name in preprocessing_toolkit.__all__
-        if isinstance(obj := getattr(preprocessing_toolkit, name), type)
+        for name in pretoolkit.__all__
+        if isinstance(obj := getattr(pretoolkit, name), type)
         and issubclass(obj, BasePreprocessor)
         and obj is not BasePreprocessor
     }
