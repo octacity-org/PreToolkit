@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from pandas.api.types import is_object_dtype, is_string_dtype
 
-from preprocessing_toolkit.base import BasePreprocessor
+from pretoolkit.base import BasePreprocessor
 
 
 class CategoricalEncoder(BasePreprocessor):

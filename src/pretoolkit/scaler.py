@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from preprocessing_toolkit.base import BasePreprocessor
+from pretoolkit.base import BasePreprocessor
 
 _METHODS = ("standard", "minmax")
 

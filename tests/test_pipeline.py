@@ -7,7 +7,7 @@ from sklearn.model_selection import GridSearchCV, cross_val_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from preprocessing_toolkit import BasePreprocessor, NotFittedError, Pipeline
+from pretoolkit import BasePreprocessor, NotFittedError, Pipeline
 
 
 class Shift(BasePreprocessor):

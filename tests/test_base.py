@@ -7,7 +7,7 @@ from sklearn.model_selection import GridSearchCV, cross_val_score
 from sklearn.pipeline import make_pipeline
 from sklearn.utils.validation import check_is_fitted
 
-from preprocessing_toolkit import BasePreprocessor, NotFittedError
+from pretoolkit import BasePreprocessor, NotFittedError
 
 
 class Dummy(BasePreprocessor):

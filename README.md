@@ -1,16 +1,19 @@
-# Preprocessing Toolkit
+# PreToolkit
 
-![CI](https://github.com/octacity-org/PreToolkit/actions/workflows/ci.yml/badge.svg)
+[![CI](https://github.com/octacity-org/PreToolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/octacity-org/PreToolkit/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/pretoolkit)](https://pypi.org/project/pretoolkit/)
 
 Composable, reproducible, and maintainable data preprocessing for machine learning.
 
-Preprocessing Toolkit provides data preparation steps — imputation, encoding, scaling, and more — as self-contained building blocks that you chain into a pipeline. Instead of rewriting the same cleaning code in every project, you compose blocks that keep track of how they transform your data and guarantee the same input is always transformed the same way.
+PreToolkit provides data preparation steps — imputation, encoding, scaling, and more — as self-contained building blocks that you chain into a pipeline. Instead of rewriting the same cleaning code in every project, you compose blocks that keep track of how they transform your data and guarantee the same input is always transformed the same way.
 
 > Part of the [Octacity](https://github.com/octacity-org) community · built by the **.LUCID** team.
 
-> **Status: v0.1 in development.** The core building blocks (`MissingValueImputer`,
-> `CategoricalEncoder`, `FeatureScaler`) and `Pipeline` are in place. See
-> [examples/quickstart.ipynb](examples/quickstart.ipynb) for a walkthrough notebook.
+> **Status: v0.1.0, the first release.** The core building blocks (`MissingValueImputer`,
+> `CategoricalEncoder`, `FeatureScaler`) and `Pipeline` are in place; the API may still
+> change before 1.0. See the
+> [quickstart notebook](https://github.com/octacity-org/PreToolkit/blob/main/examples/quickstart.ipynb)
+> for a walkthrough.
 
 ---
 
@@ -18,7 +21,7 @@ Preprocessing Toolkit provides data preparation steps — imputation, encoding, 
 
 In almost every ML project, a large share of the work is preparing the data. Yet that code is usually rewritten from scratch, slightly differently each time, and it's easy to fall into traps — most commonly **data leakage**, where information from the test set silently influences training.
 
-scikit-learn gives you the primitives, but leaves reproducibility, data-type awareness, and feature-name tracking up to you. Preprocessing Toolkit is a higher-level layer that makes those three things central:
+scikit-learn gives you the primitives, but leaves reproducibility, data-type awareness, and feature-name tracking up to you. PreToolkit is a higher-level layer that makes those three things central:
 
 - **Reproducibility first** — every block records its fitted state and the exact transformation applied, so the same dataset yields identical output across runs and people.
 - **Data-type awareness** — blocks know which columns are numeric vs. categoric and route transformations automatically; no manual column slicing.
@@ -32,18 +35,17 @@ without depending on it.
 
 ## Installation
 
-The package is not on PyPI yet. Install it from source:
+```bash
+pip install pretoolkit
+```
+
+For development, clone the repository and let [uv](https://docs.astral.sh/uv/) create
+the environment (adds `pytest`, `ruff`, `scikit-learn` and notebook tooling):
 
 ```bash
 git clone https://github.com/octacity-org/PreToolkit.git
 cd PreToolkit
-pip install -e .
-```
-
-For development (adds `pytest`, `ruff`, `scikit-learn` and notebook tooling):
-
-```bash
-pip install -e ".[dev]"
+uv sync
 ```
 
 Requires Python 3.10+. Runtime dependencies: `numpy`, `pandas`. scikit-learn is not
@@ -60,7 +62,7 @@ and missing values, and processes it through a complete pipeline:
 ```python
 import numpy as np
 import pandas as pd
-from preprocessing_toolkit import (
+from pretoolkit import (
     CategoricalEncoder,
     FeatureScaler,
     MissingValueImputer,
@@ -109,7 +111,7 @@ print(X_train_clean.round(2))
 
 The key detail: `fit` runs on the training data only. When you call `transform` on the test set, the statistics learned from training are applied — the test set never leaks into the fitting process.
 
-For an end-to-end interactive tutorial including scikit-learn cross-validation and a data leakage demonstration, see [`examples/quickstart.ipynb`](examples/quickstart.ipynb).
+For an end-to-end interactive tutorial including scikit-learn cross-validation and a data leakage demonstration, see [`examples/quickstart.ipynb`](https://github.com/octacity-org/PreToolkit/blob/main/examples/quickstart.ipynb).
 
 ---
 
@@ -142,7 +144,7 @@ new data. Numeric columns use `mean` (the default), `median` or `most_frequent`;
 non-numeric columns always use their most frequent value.
 
 ```python
-from preprocessing_toolkit import MissingValueImputer
+from pretoolkit import MissingValueImputer
 
 imputer = MissingValueImputer(strategy="median")
 X_train_filled = imputer.fit_transform(X_train)
@@ -161,11 +163,11 @@ print(imputer.statistics_)
 
 ## Roadmap
 
-**v0.1 (current focus)** — the three blocks above, a pipeline to chain them, leakage protection, unit tests, and documentation.
+**v0.1 (released)** — the three blocks above, a pipeline to chain them, leakage protection, unit tests, and documentation. See the [changelog](https://github.com/octacity-org/PreToolkit/blob/main/CHANGELOG.md).
 
 Beyond v0.1, each feature is an open contribution opportunity:
 
-- **v0.2** — ordinal encoding with custom order, robust scaler, outlier handling
+- **v0.2 (next)** — ordinal encoding with custom order, robust scaler, outlier handling, applying a block to selected columns only
 - **v0.3** — feature binning, interaction terms, full-chain feature-name mapping
 - **v0.4+** — target / frequency / binary encoding for high-cardinality columns, pipeline save & load
 
@@ -177,15 +179,15 @@ Contributions are welcome — the modular design means each block is largely ind
 
 To add a new block:
 
-1. Open an issue describing the block and its interface.
+1. Claim an existing issue by commenting on it, or open one describing the block and its interface.
 2. Subclass `BasePreprocessor` and implement `_fit` and `_transform`.
 3. Add unit tests and a short usage example.
 4. Open a PR; the maintaining team reviews for interface consistency.
 
-See `CONTRIBUTING.md` for details.
+See [CONTRIBUTING.md](https://github.com/octacity-org/PreToolkit/blob/main/CONTRIBUTING.md) for details.
 
 ---
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](https://github.com/octacity-org/PreToolkit/blob/main/LICENSE).

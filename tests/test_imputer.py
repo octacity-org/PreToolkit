@@ -6,7 +6,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV, cross_val_score
 from sklearn.pipeline import make_pipeline
 
-from preprocessing_toolkit import MissingValueImputer, NotFittedError
+from pretoolkit import MissingValueImputer, NotFittedError
 
 
 def test_fit_uses_training_statistics_for_numeric_and_text_columns():
