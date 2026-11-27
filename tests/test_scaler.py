@@ -5,6 +5,7 @@ from sklearn.base import clone
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV, cross_val_score
 from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
 
 from pretoolkit import BasePreprocessor, FeatureScaler, NotFittedError
 
@@ -120,6 +121,53 @@ def test_constant_column_gets_scale_one_and_becomes_zero(method):
     assert block.scale_ == {"c": 1.0}
     out = block.transform(X)
     assert out["c"].tolist() == [0.0, 0.0, 0.0]
+
+
+@pytest.mark.parametrize("method", ["standard", "minmax"])
+def test_nearly_constant_column_is_treated_as_constant(method):
+    # 0.1 + 0.2 differs from 0.3 only by floating-point rounding.
+    X = pd.DataFrame({"x": [0.1 + 0.2, 0.3, 0.3]})
+    block = FeatureScaler(method=method).fit(X)
+    assert block.scale_ == {"x": 1.0}
+    out = block.transform(X)
+    np.testing.assert_allclose(out["x"], 0.0, atol=1e-12)
+
+
+def test_nearly_constant_column_matches_sklearn_standard_scaler():
+    X = pd.DataFrame({"x": [0.1 + 0.2, 0.3, 0.3], "y": [1.0, 2.0, 3.0]})
+    ours = FeatureScaler().fit_transform(X)
+    theirs = StandardScaler().fit_transform(X)
+    np.testing.assert_allclose(ours.to_numpy(), theirs, atol=1e-12)
+
+
+@pytest.mark.parametrize("method", ["standard", "minmax"])
+def test_large_nearly_constant_column_is_treated_as_constant(method):
+    # The threshold is relative to the column's magnitude: 1e-10 noise on 1e6
+    # is below rounding error for numbers of that size.
+    X = pd.DataFrame({"x": [1e6, 1e6 + 1e-10, 1e6 - 1e-10, 1e6]})
+    block = FeatureScaler(method=method).fit(X)
+    assert block.scale_ == {"x": 1.0}
+    np.testing.assert_allclose(block.transform(X)["x"], 0.0, atol=1e-6)
+
+
+def test_small_but_real_spread_is_still_scaled():
+    X = pd.DataFrame({"x": [1e-9, 2e-9, 3e-9]})
+    block = FeatureScaler().fit(X)
+    assert block.scale_["x"] == pytest.approx(np.std([1e-9, 2e-9, 3e-9]))
+
+
+@pytest.mark.parametrize("method", ["standard", "minmax"])
+def test_small_real_spread_around_zero_is_scaled_normally(method):
+    X = pd.DataFrame({"x": [0.0, 1e-3, 2e-3]})
+    block = FeatureScaler(method=method).fit(X)
+    assert block.scale_["x"] != 1.0
+    out = block.transform(X)["x"].to_numpy()
+    expected = (
+        StandardScaler().fit_transform(X)[:, 0]
+        if method == "standard"
+        else [0.0, 0.5, 1.0]
+    )
+    np.testing.assert_allclose(out, expected, atol=1e-12)
 
 
 @pytest.mark.parametrize("method", ["standard", "minmax"])
