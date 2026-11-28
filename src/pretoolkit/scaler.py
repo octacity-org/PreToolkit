@@ -1,5 +1,6 @@
 """Scale numeric columns to a common range."""
 
+import numpy as np
 import pandas as pd
 
 from pretoolkit.base import BasePreprocessor
@@ -19,7 +20,8 @@ class FeatureScaler(BasePreprocessor):
 
     Non-numeric (including boolean) columns pass through unchanged. Missing
     values are ignored when learning statistics and stay missing. A constant
-    column gets a scale of 1, so it becomes 0 instead of NaN or infinity.
+    column, or one whose spread is only floating-point rounding noise, gets a
+    scale of 1, so it becomes 0 instead of NaN or infinity.
 
     Attributes
     ----------
@@ -51,8 +53,12 @@ class FeatureScaler(BasePreprocessor):
             center = numeric.min()
             scale = numeric.max() - center
         self.center_ = {col: float(center[col]) for col in numeric.columns}
+        # A spread at the level of floating-point rounding error (relative to the
+        # column's magnitude) is treated as zero, like scikit-learn does.
+        eps = np.finfo(np.float64).eps
+        magnitude = numeric.abs().max()
         self.scale_ = {
-            col: 1.0 if scale[col] == 0 else float(scale[col])
+            col: 1.0 if scale[col] <= 10 * eps * magnitude[col] else float(scale[col])
             for col in numeric.columns
         }
 
